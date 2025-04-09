@@ -1,0 +1,56 @@
+name: CI/CD master
+on: 
+  push:
+    branches: [ "master"]
+    
+jobs:
+  ci_cd_deploy_master:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - run: echo 'hello worlds'
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+  
+  
+            
+      - name: download and run httpd docker imagen
+        run:  |
+            docker run -d --name frontpg httpd
+      
+      - name: docker ps
+        run:  |
+            docker ps
+      
+      - name: Remove old files
+        run: docker exec frontpg rm -rf /usr/local/apache2/htdocs/*
+
+      - name: cp Angular build to containers
+        run:  |
+              docker cp /.  frontpg:/usr/local/apache2/htdocs
+      - name: show conteiner
+        run: |
+               docker exec frontpg ls -la /usr/local/apache2/htdocs
+              
+              
+      - name: docker custom image
+        run:  |
+              docker commit --change "ENV MODEL_NAME ${{secrets.MODEL_NAME}}" frontpg ${{secrets.DOCKER_USER}}/${{secrets.MODEL_NAME}}:${{github.sha}}
+     
+      - name: docker images
+        run: docker images
+      
+      - name: docker login
+        env:
+         DOCKER_USER: ${{secrets.DOCKER_USER}}
+         DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+        
+        run:  |
+            docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+            
+      - name: docker push
+        run: docker push ${{secrets.DOCKER_USER}}/${{secrets.MODEL_NAME}}:${{github.sha}}
