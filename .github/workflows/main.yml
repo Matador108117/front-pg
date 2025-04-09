@@ -31,7 +31,7 @@ jobs:
 
       - name: cp Angular build to containers
         run:  |
-              docker cp /.  frontpg:/usr/local/apache2/htdocs
+              docker cp src/.  frontpg:/usr/local/apache2/htdocs
       - name: show conteiner
         run: |
                docker exec frontpg ls -la /usr/local/apache2/htdocs
