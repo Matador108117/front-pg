@@ -1,37 +1,127 @@
 <!DOCTYPE html>
-<!--hola--->
-<html>
-  <body>
-    <p>
-      Consumo de REST-API de Usuarios
-    </p>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User CRUD</title>
+    <link rel="icon" type="image/x-icon" href="../src/public/carpeta (1).png    ">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href = "./stylesPrime.css" rel="stylesheet">
 
-    <div>
-      <label>Name </label>
-      <input type="text" id="name">
-    </div>
+</head>
+<body onload="getUsers()">
+    <div class = "container">
+        <div class = "navPrime">
+                <h1>User Management</h1>
+            <div class="search-button ">
+                <input type="text" id= "text" placeholder="Search users...">
+                <button onclick="searchUser()"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+        <div class ="tablePrime">
+            <div class = "table-section">
+<div id="spinner-container" style="display: none; text-align: center; margin: 20px;">
+    <div class="spinner"></div>
+    <p id="loadingMsg" style="font-weight: 500;">loading...</p>
+  </div>
+  
+                <div id="resultado"></div>
+                <div class="buttons">
+                    <button onclick="openModal('add')"  id="add" >
+                        <i class="fas fa-user-plus"></i> Add User
+                    </button>
+                    <button onclick="getUsers()">
+                        <i class="fas fa-sync-alt"></i> Refresh Table
+                    </button>  
+                </div>
+                <div class="modal-overlay" id="employeeModal">
+                    <div class="modal">
+                      <div class="modal-header">
+                        <h2 id="modalTitle">Add Employee</h2>
+                        <span class="close" onclick="closeModal()">&times;</span>
+                      </div>
+                      <div class="modal-body">
+                        <form id="employeeForm">
+                          <input type="hidden" id="userId" />
+                          <input type="text" id="name" placeholder="Name" required/>
+                          <input type="email" id="email" placeholder="Email" required/>
+                          <input type="number" id="age" placeholder="Age" required/>
+                          <textarea type="text" id="comments" placeholder="comments" required></textarea>
+                          <button type="submit" id="actionButton">save</button>
+                        </form>
+                      </div>
+                    </div>
+    
+</body>
 
-    <div>
-      <label>Email </label>
-      <input type="text" id="email">
-    </div>
 
-    <div>
-      <label>Age </label>
-      <input type="text" id="age">
-    </div>
 
-    <div>
-      <label>Comments </label>
- <input type="text" id="comments">
-    </div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
+<script src ="callrestapi.js"></script>
 
-    <button onclick="postUser()"> POST user </button>
-    <button onclick="getUsers()"> GET usuarios </button>
+<script>
+    document.getElementById('employeeForm').addEventListener('submit', function (e) {
+      e.preventDefault(); // Previene recarga automática
+  
+      if (!this.checkValidity()) {
+        // Si hay campos inválidos, el navegador los resalta automáticamente
+        return;
+      }
+  
+      const mode = document.getElementById("userId").value === "" ? "add" : "edit";
+  
+      if (mode === "add") {
+        postUser();
+      } else {
+        confirmUpdate(document.getElementById("userId").value);
+      }
+    });
+  </script>
+  
+<script>
+function openModal(type, user = null) {
+  const modal = document.getElementById("employeeModal");
+  const title = document.getElementById("modalTitle");
+  const actionBtn = document.getElementById("actionButton");
+  modal.classList.add("show");
 
-    <div id="resultado"></div>
+  if (type === "add") {
+    title.textContent = "Add Employee";
+    document.getElementById("employeeForm").reset();
+    document.getElementById("userId").value = "";
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="callrestapi.js"></script>
-  </body>
-</html>
+    // Actualizar texto y funcionalidad del botón
+    actionBtn.textContent = "Save";
+    actionBtn.onclick = function() {
+      postUser();
+    };
+  } else if (type === "edit" && user) {
+    title.textContent = "Edit User";
+    document.getElementById("name").value = user.name;
+    document.getElementById("email").value = user.email;
+    document.getElementById("age").value = user.age;
+    document.getElementById("comments").value = user.comments;
+    document.getElementById("userId").value = user.id;
+
+    // Actualizar texto y funcionalidad del botón
+    actionBtn.textContent = "Update";
+    actionBtn.onclick = function() {
+      confirmUpdate(user.id);
+    };
+  }
+
+  modal.style.display = "flex";
+}
+
+
+function closeModal() {
+  document.getElementById("employeeModal").style.display = "none";
+  modal.classList.remove("show");
+}
+
+    </script>
+    </html>
